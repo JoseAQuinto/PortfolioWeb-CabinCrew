@@ -790,18 +790,31 @@ function setupHeroRouteCanvas() {
     });
 
     const markerProgress = staticFrame ? 0.64 : (time % 11800) / 11800;
-    const marker = getPoint(routes[0], markerProgress);
-    const glow = context.createRadialGradient(marker.x, marker.y, 0, marker.x, marker.y, 14);
-    glow.addColorStop(0, "rgba(211, 164, 74, 0.78)");
+    const activeRoute = routes[0];
+    const marker = getPoint(activeRoute, markerProgress);
+    const markerInverse = 1 - markerProgress;
+    const tangentX = (2 * markerInverse * (activeRoute.control[0] - activeRoute.start[0]) + 2 * markerProgress * (activeRoute.end[0] - activeRoute.control[0])) * width;
+    const tangentY = (2 * markerInverse * (activeRoute.control[1] - activeRoute.start[1]) + 2 * markerProgress * (activeRoute.end[1] - activeRoute.control[1])) * height;
+    const markerAngle = Math.atan2(tangentY, tangentX) - Math.PI / 4;
+    const glow = context.createRadialGradient(marker.x, marker.y, 0, marker.x, marker.y, 17);
+    glow.addColorStop(0, "rgba(211, 164, 74, 0.7)");
     glow.addColorStop(1, "rgba(211, 164, 74, 0)");
     context.beginPath();
-    context.arc(marker.x, marker.y, 14, 0, Math.PI * 2);
+    context.arc(marker.x, marker.y, 17, 0, Math.PI * 2);
     context.fillStyle = glow;
     context.fill();
-    context.beginPath();
-    context.arc(marker.x, marker.y, 2.8, 0, Math.PI * 2);
-    context.fillStyle = "rgba(211, 164, 74, 0.95)";
-    context.fill();
+
+    context.save();
+    context.translate(marker.x, marker.y);
+    context.rotate(markerAngle);
+    context.font = '18px "Segoe UI Symbol", Arial, sans-serif';
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillStyle = "rgba(211, 164, 74, 0.98)";
+    context.shadowColor = "rgba(211, 164, 74, 0.5)";
+    context.shadowBlur = 7;
+    context.fillText("✈︎", 0, 0);
+    context.restore();
     context.restore();
   };
 

@@ -201,4 +201,4 @@ Netlify no envía avisos por correo automáticamente por el simple hecho de reci
 
 ## Accesibilidad y rendimiento
 
-El sitio incluye HTML semántico, enlace de salto, focos visibles, menú accesible, mensajes de error asociados, soporte para `prefers-reduced-motion` y controles táctiles amplios. No carga librerías, frameworks ni fuentes remotas. Optimiza la fotografía y la imagen social antes de publicarlas para conservar una carga rápida.
+El sitio incluye HTML semántico, enlace de salto, focos visibles, menú accesible, mensajes de error asociados, soporte para `prefers-reduced-motion` y controles táctiles amplios. La animación de la ruta aérea usa JavaScript puro, solo se ejecuta cuando su sección está visible y queda estática cuando el usuario prefiere reducir el movimiento. No carga librerías, frameworks ni fuentes remotas. Optimiza la fotografía y la imagen social antes de publicarlas para conservar una carga rápida.

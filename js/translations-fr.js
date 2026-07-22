@@ -49,6 +49,7 @@ window.portfolioTranslations.fr = {
   "about.fact3": "Disponible pour une mobilité géographique.",
   "motivation.kicker": "Motivation",
   "motivation.title": "Pourquoi devenir personnel navigant commercial",
+  "motivation.visualLabel": "service · sécurité · personnes",
   "motivation.body1": "Je m’intéresse à une profession dans laquelle prendre soin des personnes signifie associer proximité et responsabilité. Je souhaite contribuer à ce que chaque passager se sente accompagné, informé et en sécurité, notamment lorsqu’il a besoin d’aide ou qu’une situation imprévue se présente.",
   "motivation.body2": "L’environnement international, la coordination d’équipes multiculturelles et la nécessité de s’adapter à chaque journée correspondent à ma façon de travailler. Mon objectif ne se limite pas à voyager : je souhaite construire une carrière durable dans l’aviation, apprendre les procédures avec rigueur et évoluer au sein d’une équipe qui partage des exigences élevées en matière de service et de sécurité.",
   "experience.kicker": "Parcours",

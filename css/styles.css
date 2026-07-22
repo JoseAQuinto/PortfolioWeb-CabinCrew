@@ -822,6 +822,33 @@ h3 {
   transform: rotate(-14deg);
 }
 
+.flight-plane {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: var(--navy-950);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(169, 217, 233, 0.75);
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(7, 26, 47, 0.35);
+  font-family: "Segoe UI Symbol", sans-serif;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.flight-plane.is-static {
+  opacity: 0.78;
+  will-change: auto;
+}
+
 .motivation-visual p {
   position: absolute;
   right: 1.5rem;

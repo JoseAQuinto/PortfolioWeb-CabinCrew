@@ -72,6 +72,7 @@ const translations = {
     "about.fact3": "Disponibilidad para cambiar de residencia.",
     "motivation.kicker": "Motivación",
     "motivation.title": "Por qué cabin crew",
+    "motivation.visualLabel": "servicio · seguridad · personas",
     "motivation.body1": "Me atrae una profesión en la que cuidar de las personas significa combinar cercanía con responsabilidad. Quiero contribuir a que cada pasajero se sienta atendido, informado y seguro, especialmente cuando necesita ayuda o surge una situación inesperada.",
     "motivation.body2": "El entorno internacional, la coordinación de equipos multiculturales y la necesidad de adaptarse a cada jornada encajan con mi forma de trabajar. Mi objetivo no es solo volar: es desarrollar una carrera a largo plazo en aviación, aprender procedimientos con rigor y crecer dentro de un equipo que comparte estándares altos de servicio y seguridad.",
 
@@ -288,6 +289,7 @@ const translations = {
     "about.fact3": "Available to relocate.",
     "motivation.kicker": "Motivation",
     "motivation.title": "Why cabin crew",
+    "motivation.visualLabel": "service · safety · people",
     "motivation.body1": "I am interested in a profession where caring for people means combining a warm approach with responsibility. I want to help every passenger feel supported, informed and safe, especially when they need assistance or an unexpected situation occurs.",
     "motivation.body2": "The international environment, the coordination of multicultural teams and the need to adapt to each working day suit the way I work. My goal is not simply to fly. I want to build a long-term career in aviation, learn procedures carefully and grow in a team that shares high standards of service and safety.",
 
@@ -717,6 +719,90 @@ function setupSectionHighlighting() {
   sections.forEach((section) => observer.observe(section));
 }
 
+function setupFlightAnimation() {
+  const route = document.querySelector(".motivation-visual");
+  const plane = route?.querySelector(".flight-plane");
+  if (!route || !plane) return;
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const flightDuration = 7600;
+  const pauseDuration = 2800;
+  let width = route.clientWidth;
+  let height = route.clientHeight;
+  let frameId = null;
+  let cycleStart = performance.now();
+  let isVisible = false;
+
+  const updateDimensions = () => {
+    width = route.clientWidth;
+    height = route.clientHeight;
+  };
+
+  const positionPlane = (progress, forceVisible = false) => {
+    const start = { x: width * 0.18, y: height * 0.62 };
+    const control = { x: width * 0.5, y: height * 0.32 };
+    const end = { x: width * 0.83, y: height * 0.27 };
+    const inverse = 1 - progress;
+    const x = inverse * inverse * start.x + 2 * inverse * progress * control.x + progress * progress * end.x;
+    const y = inverse * inverse * start.y + 2 * inverse * progress * control.y + progress * progress * end.y;
+    const tangentX = 2 * inverse * (control.x - start.x) + 2 * progress * (end.x - control.x);
+    const tangentY = 2 * inverse * (control.y - start.y) + 2 * progress * (end.y - control.y);
+    const angle = Math.atan2(tangentY, tangentX) * (180 / Math.PI) - 45;
+    const fade = forceVisible ? 0.78 : Math.min(1, progress * 8, (1 - progress) * 8);
+
+    plane.style.transform = `translate3d(${x - 17}px, ${y - 17}px, 0) rotate(${angle}deg)`;
+    plane.style.opacity = String(Math.max(0, fade));
+  };
+
+  const stopAnimation = () => {
+    if (frameId) cancelAnimationFrame(frameId);
+    frameId = null;
+  };
+
+  const animate = (time) => {
+    if (!isVisible || document.hidden || reducedMotion.matches) {
+      stopAnimation();
+      return;
+    }
+
+    const cycleLength = flightDuration + pauseDuration;
+    const elapsed = (time - cycleStart) % cycleLength;
+    const progress = Math.min(elapsed / flightDuration, 1);
+    positionPlane(progress);
+    frameId = requestAnimationFrame(animate);
+  };
+
+  const startAnimation = () => {
+    stopAnimation();
+    updateDimensions();
+    if (reducedMotion.matches) {
+      plane.classList.add("is-static");
+      positionPlane(0.58, true);
+      return;
+    }
+    plane.classList.remove("is-static");
+    cycleStart = performance.now();
+    frameId = requestAnimationFrame(animate);
+  };
+
+  if ("IntersectionObserver" in window) {
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) startAnimation();
+      else stopAnimation();
+    }, { threshold: 0.2 });
+    visibilityObserver.observe(route);
+  } else {
+    isVisible = true;
+    startAnimation();
+  }
+  window.addEventListener("resize", updateDimensions);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && isVisible) startAnimation();
+    else stopAnimation();
+  });
+  reducedMotion.addEventListener?.("change", startAnimation);
+}
 function initialisePortfolio() {
   const yearElement = document.querySelector("#current-year");
   if (yearElement) yearElement.textContent = new Date().getFullYear();
@@ -728,6 +814,7 @@ function initialisePortfolio() {
   setupFormValidation();
   setupRevealAnimations();
   setupSectionHighlighting();
+  setupFlightAnimation();
 }
 
 document.addEventListener("DOMContentLoaded", initialisePortfolio);

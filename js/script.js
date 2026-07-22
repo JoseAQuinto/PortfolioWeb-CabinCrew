@@ -719,6 +719,167 @@ function setupSectionHighlighting() {
   sections.forEach((section) => observer.observe(section));
 }
 
+function setupHeroRouteCanvas() {
+  const hero = document.querySelector(".hero");
+  const canvas = hero?.querySelector(".hero-route-canvas");
+  const context = canvas?.getContext("2d");
+  if (!hero || !canvas || !context) return;
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const finePointer = window.matchMedia("(pointer: fine)");
+  const routes = [
+    { start: [0.47, 0.14], control: [0.76, -0.02], end: [1.03, 0.26], color: "rgba(47, 111, 159, 0.3)" },
+    { start: [0.5, 0.7], control: [0.75, 0.45], end: [1.04, 0.62], color: "rgba(103, 184, 212, 0.34)" },
+    { start: [0.68, 0.34], control: [0.86, 0.3], end: [1.02, 0.43], color: "rgba(211, 164, 74, 0.24)" }
+  ];
+  let width = 0;
+  let height = 0;
+  let pixelRatio = 1;
+  let frameId = null;
+  let isVisible = false;
+  let targetOffset = { x: 0, y: 0 };
+  let currentOffset = { x: 0, y: 0 };
+
+  const getPoint = (route, progress) => {
+    const inverse = 1 - progress;
+    return {
+      x: (inverse * inverse * route.start[0] + 2 * inverse * progress * route.control[0] + progress * progress * route.end[0]) * width,
+      y: (inverse * inverse * route.start[1] + 2 * inverse * progress * route.control[1] + progress * progress * route.end[1]) * height
+    };
+  };
+
+  const drawNode = (point, color, pulse = 0) => {
+    if (pulse > 0) {
+      context.beginPath();
+      context.arc(point.x, point.y, 8 + pulse * 7, 0, Math.PI * 2);
+      context.strokeStyle = color;
+      context.globalAlpha = 0.16 * (1 - pulse);
+      context.lineWidth = 1;
+      context.stroke();
+    }
+    context.globalAlpha = 0.82;
+    context.beginPath();
+    context.arc(point.x, point.y, 3.1, 0, Math.PI * 2);
+    context.fillStyle = color;
+    context.fill();
+    context.globalAlpha = 1;
+  };
+
+  const draw = (time, staticFrame = false) => {
+    context.clearRect(0, 0, width, height);
+    context.save();
+    context.translate(currentOffset.x, currentOffset.y);
+
+    routes.forEach((route, index) => {
+      const start = getPoint(route, 0);
+      const control = { x: route.control[0] * width, y: route.control[1] * height };
+      const end = getPoint(route, 1);
+      context.beginPath();
+      context.moveTo(start.x, start.y);
+      context.quadraticCurveTo(control.x, control.y, end.x, end.y);
+      context.strokeStyle = route.color;
+      context.lineWidth = index === 0 ? 1.25 : 1;
+      context.setLineDash(index === 2 ? [2, 10] : [6, 9]);
+      context.lineDashOffset = staticFrame ? 0 : -(time * (index === 0 ? 0.012 : 0.007));
+      context.stroke();
+      context.setLineDash([]);
+
+      const pulse = staticFrame ? 0 : (Math.sin(time * 0.002 + index) + 1) / 2;
+      drawNode(start, index === 2 ? "rgba(211, 164, 74, 0.8)" : "rgba(47, 111, 159, 0.72)", pulse);
+      drawNode(end, index === 0 ? "rgba(211, 164, 74, 0.85)" : "rgba(103, 184, 212, 0.74)");
+    });
+
+    const markerProgress = staticFrame ? 0.64 : (time % 11800) / 11800;
+    const marker = getPoint(routes[0], markerProgress);
+    const glow = context.createRadialGradient(marker.x, marker.y, 0, marker.x, marker.y, 14);
+    glow.addColorStop(0, "rgba(211, 164, 74, 0.78)");
+    glow.addColorStop(1, "rgba(211, 164, 74, 0)");
+    context.beginPath();
+    context.arc(marker.x, marker.y, 14, 0, Math.PI * 2);
+    context.fillStyle = glow;
+    context.fill();
+    context.beginPath();
+    context.arc(marker.x, marker.y, 2.8, 0, Math.PI * 2);
+    context.fillStyle = "rgba(211, 164, 74, 0.95)";
+    context.fill();
+    context.restore();
+  };
+
+  const resizeCanvas = () => {
+    const bounds = hero.getBoundingClientRect();
+    width = Math.max(1, bounds.width);
+    height = Math.max(1, hero.offsetHeight);
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    canvas.width = Math.round(width * pixelRatio);
+    canvas.height = Math.round(height * pixelRatio);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    draw(performance.now(), reducedMotion.matches);
+  };
+
+  const stopAnimation = () => {
+    if (frameId) cancelAnimationFrame(frameId);
+    frameId = null;
+  };
+
+  const animate = (time) => {
+    if (!isVisible || document.hidden || reducedMotion.matches) {
+      stopAnimation();
+      return;
+    }
+    currentOffset.x += (targetOffset.x - currentOffset.x) * 0.04;
+    currentOffset.y += (targetOffset.y - currentOffset.y) * 0.04;
+    draw(time);
+    frameId = requestAnimationFrame(animate);
+  };
+
+  const startAnimation = () => {
+    stopAnimation();
+    if (reducedMotion.matches) {
+      currentOffset = { x: 0, y: 0 };
+      draw(0, true);
+      return;
+    }
+    frameId = requestAnimationFrame(animate);
+  };
+
+  if (finePointer.matches) {
+    hero.addEventListener("pointermove", (event) => {
+      if (reducedMotion.matches) return;
+      const bounds = hero.getBoundingClientRect();
+      targetOffset.x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 12;
+      targetOffset.y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 8;
+    });
+    hero.addEventListener("pointerleave", () => {
+      targetOffset = { x: 0, y: 0 };
+    });
+  }
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) startAnimation();
+      else stopAnimation();
+    }, { threshold: 0.05 });
+    observer.observe(hero);
+  } else {
+    isVisible = true;
+    startAnimation();
+  }
+
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(resizeCanvas).observe(hero);
+  } else {
+    window.addEventListener("resize", resizeCanvas);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && isVisible) startAnimation();
+    else stopAnimation();
+  });
+  reducedMotion.addEventListener?.("change", startAnimation);
+  resizeCanvas();
+}
 function setupFlightAnimation() {
   const route = document.querySelector(".motivation-visual");
   const plane = route?.querySelector(".flight-plane");
@@ -814,6 +975,7 @@ function initialisePortfolio() {
   setupFormValidation();
   setupRevealAnimations();
   setupSectionHighlighting();
+  setupHeroRouteCanvas();
   setupFlightAnimation();
 }
 

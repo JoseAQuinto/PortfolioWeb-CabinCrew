@@ -719,6 +719,27 @@ function setupSectionHighlighting() {
   sections.forEach((section) => observer.observe(section));
 }
 
+function setupScrollFlightProgress() {
+  const track = document.querySelector(".scroll-flight-track");
+  if (!track) return;
+
+  let frameId = null;
+  const updateProgress = () => {
+    const scrollableHeight = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const progress = Math.min(1, Math.max(0, window.scrollY / scrollableHeight));
+    track.style.setProperty("--flight-progress", `${progress * 100}%`);
+    frameId = null;
+  };
+  const requestUpdate = () => {
+    if (frameId) return;
+    frameId = requestAnimationFrame(updateProgress);
+  };
+
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
+  updateProgress();
+}
+
 function setupHeroRouteCanvas() {
   const hero = document.querySelector(".hero");
   const canvas = hero?.querySelector(".hero-route-canvas");
@@ -1222,6 +1243,7 @@ function initialisePortfolio() {
   setupFormValidation();
   setupRevealAnimations();
   setupSectionHighlighting();
+  setupScrollFlightProgress();
   setupHeroRouteCanvas();
   setupFlightAnimation();
 }

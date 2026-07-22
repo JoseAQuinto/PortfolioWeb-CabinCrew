@@ -261,6 +261,66 @@ h3 {
   backdrop-filter: blur(14px);
 }
 
+.scroll-flight-progress {
+  position: absolute;
+  z-index: 101;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  pointer-events: none;
+}
+
+.scroll-flight-track {
+  position: absolute;
+  inset: 0 10px;
+  background: repeating-linear-gradient(90deg, rgba(47, 111, 159, 0.2) 0 5px, transparent 5px 10px);
+}
+
+.scroll-flight-complete {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--flight-progress, 0%);
+  background: linear-gradient(90deg, var(--sky-300), var(--sky-500));
+}
+
+.scroll-flight-plane {
+  position: absolute;
+  top: 50%;
+  left: var(--flight-progress, 0%);
+  width: 19px;
+  height: 6px;
+  background: linear-gradient(180deg, #f8fafb, #7891a3 72%, #264b65);
+  border: 1px solid rgba(11, 37, 69, 0.62);
+  border-radius: 70% 45% 45% 70%;
+  box-shadow: 0 2px 7px rgba(7, 26, 47, 0.26);
+  transform: translate(-50%, -50%);
+  will-change: left;
+}
+
+.scroll-flight-plane::before,
+.scroll-flight-plane::after {
+  position: absolute;
+  top: 50%;
+  background: linear-gradient(90deg, #294f69, #eef3f6 48%, #6f899b);
+  content: "";
+  transform: translateY(-50%);
+}
+
+.scroll-flight-plane::before {
+  left: 6px;
+  width: 8px;
+  height: 20px;
+  clip-path: polygon(40% 0, 60% 0, 70% 37%, 100% 45%, 100% 55%, 70% 63%, 60% 100%, 40% 100%, 30% 63%, 0 55%, 0 45%, 30% 37%);
+}
+
+.scroll-flight-plane::after {
+  left: 1px;
+  width: 5px;
+  height: 10px;
+  clip-path: polygon(38% 0, 62% 0, 72% 37%, 100% 45%, 100% 55%, 72% 63%, 62% 100%, 38% 100%, 28% 63%, 0 55%, 0 45%, 28% 37%);
+}
+
 .nav-shell {
   display: flex;
   min-height: var(--header-height);

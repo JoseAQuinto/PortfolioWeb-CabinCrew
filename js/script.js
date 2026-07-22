@@ -941,20 +941,23 @@ function setupFlightAnimation() {
   if (!route || !canvas || !context) return;
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const flightDuration = 15000;
-  const pauseDuration = 2400;
+  const flightDuration = 19000;
+  const turnaroundPause = 1000;
+  const homePause = 1400;
   const cities = [
-    { id: "madrid", lon: -3.7, lat: 40.42, labelOffset: [-7, 15] },
-    { id: "paris", lon: 2.35, lat: 48.86, labelOffset: [7, -9] },
-    { id: "london", lon: -0.13, lat: 51.51, labelOffset: [-7, -10] },
-    { id: "berlin", lon: 13.41, lat: 52.52, labelOffset: [8, -9] },
-    { id: "rome", lon: 12.5, lat: 41.9, labelOffset: [8, 15] }
+    { id: "lisbon", lon: -9.14, lat: 38.72, labelOffset: [-7, 15] },
+    { id: "madrid", lon: -3.7, lat: 40.42, labelOffset: [7, 16] },
+    { id: "paris", lon: 2.35, lat: 48.86, labelOffset: [7, -10] },
+    { id: "london", lon: -0.13, lat: 51.51, labelOffset: [-7, -11] },
+    { id: "amsterdam", lon: 4.9, lat: 52.37, labelOffset: [8, 15] },
+    { id: "berlin", lon: 13.41, lat: 52.52, labelOffset: [8, -10] },
+    { id: "rome", lon: 12.5, lat: 41.9, labelOffset: [8, 16] }
   ];
   const cityNames = {
-    es: { madrid: "Madrid", paris: "París", london: "Londres", berlin: "Berlín", rome: "Roma" },
-    en: { madrid: "Madrid", paris: "Paris", london: "London", berlin: "Berlin", rome: "Rome" },
-    fr: { madrid: "Madrid", paris: "Paris", london: "Londres", berlin: "Berlin", rome: "Rome" },
-    pt: { madrid: "Madrid", paris: "Paris", london: "Londres", berlin: "Berlim", rome: "Roma" }
+    es: { lisbon: "Lisboa", madrid: "Madrid", paris: "París", london: "Londres", amsterdam: "Ámsterdam", berlin: "Berlín", rome: "Roma" },
+    en: { lisbon: "Lisbon", madrid: "Madrid", paris: "Paris", london: "London", amsterdam: "Amsterdam", berlin: "Berlin", rome: "Rome" },
+    fr: { lisbon: "Lisbonne", madrid: "Madrid", paris: "Paris", london: "Londres", amsterdam: "Amsterdam", berlin: "Berlin", rome: "Rome" },
+    pt: { lisbon: "Lisboa", madrid: "Madrid", paris: "Paris", london: "Londres", amsterdam: "Amesterdão", berlin: "Berlim", rome: "Roma" }
   };
   let width = 0;
   let height = 0;
@@ -964,15 +967,14 @@ function setupFlightAnimation() {
   let cycleStart = performance.now();
 
   const project = (lon, lat) => {
-    const horizontalPadding = Math.max(22, width * 0.075);
-    const topPadding = Math.max(20, height * 0.07);
-    const bottomPadding = Math.max(20, height * 0.07);
+    const horizontalPadding = Math.max(16, width * 0.045);
+    const topPadding = Math.max(18, height * 0.055);
+    const bottomPadding = Math.max(18, height * 0.055);
     return {
-      x: horizontalPadding + ((lon + 12) / 43) * (width - horizontalPadding * 2),
-      y: topPadding + ((62 - lat) / 28) * (height - topPadding - bottomPadding)
+      x: horizontalPadding + ((lon + 11) / 26.5) * (width - horizontalPadding * 2),
+      y: topPadding + ((54.5 - lat) / 18.5) * (height - topPadding - bottomPadding)
     };
   };
-
   const getRouteSegments = (points) => points.slice(0, -1).map((point, index) => {
     const previous = points[Math.max(0, index - 1)];
     const next = points[index + 1];
@@ -1079,7 +1081,23 @@ function setupFlightAnimation() {
     context.clearRect(0, 0, width, height);
     const points = cities.map((city) => project(city.lon, city.lat));
     const segments = getRouteSegments(points);
-    const progress = staticFrame ? 0.58 : Math.min(((time - cycleStart) % (flightDuration + pauseDuration)) / flightDuration, 1);
+    let progress = 0.58;
+    let flightDirection = 1;
+    if (!staticFrame) {
+      const cycleDuration = flightDuration * 2 + turnaroundPause + homePause;
+      const elapsed = (time - cycleStart) % cycleDuration;
+      if (elapsed < flightDuration) {
+        progress = elapsed / flightDuration;
+      } else if (elapsed < flightDuration + turnaroundPause) {
+        progress = 1;
+      } else if (elapsed < flightDuration * 2 + turnaroundPause) {
+        progress = 1 - (elapsed - flightDuration - turnaroundPause) / flightDuration;
+        flightDirection = -1;
+      } else {
+        progress = 0;
+        flightDirection = -1;
+      }
+    }
     const routePosition = Math.min(progress * segments.length, segments.length - 0.0001);
     const segmentIndex = Math.floor(routePosition);
     const localProgress = routePosition - segmentIndex;
@@ -1125,7 +1143,7 @@ function setupFlightAnimation() {
     const activeSegment = segments[segmentIndex];
     const aircraftPoint = getBezierPoint(activeSegment, localProgress);
     const tangent = getBezierTangent(activeSegment, localProgress);
-    const angle = Math.atan2(tangent.y, tangent.x);
+    const angle = Math.atan2(tangent.y, tangent.x) + (flightDirection < 0 ? Math.PI : 0);
     const glow = context.createRadialGradient(aircraftPoint.x, aircraftPoint.y, 0, aircraftPoint.x, aircraftPoint.y, 18);
     glow.addColorStop(0, "rgba(169, 217, 233, 0.18)");
     glow.addColorStop(1, "rgba(169, 217, 233, 0)");

@@ -475,26 +475,6 @@ h3 {
   gap: 3.5rem;
 }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  color: var(--blue-600);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  gap: 0.55rem;
-}
-
-.eyebrow-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--success);
-  border-radius: 50%;
-  box-shadow: 0 0 0 5px rgba(23, 122, 82, 0.12);
-}
-
 .hero h1 {
   margin-bottom: 1.5rem;
 }
@@ -859,17 +839,6 @@ h3 {
 
 .motivation-copy p:not(.section-number) {
   color: var(--grey-700);
-}
-
-.motivation-copy blockquote {
-  padding-left: 1.25rem;
-  margin: 2rem 0 0;
-  color: var(--navy-900);
-  border-left: 3px solid var(--sky-500);
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-style: italic;
-  line-height: 1.5;
 }
 
 /* =========================================================

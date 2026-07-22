@@ -458,6 +458,27 @@ const translations = {
   }
 };
 
+Object.assign(translations, window.portfolioTranslations || {});
+
+const portfolioMetadata = {
+  es: {
+    title: `${candidateData.fullName} | Tripulante de Cabina · Cabin Crew`,
+    description: `Portfolio profesional de ${candidateData.fullName}, candidato a Tripulante de Cabina con experiencia en atención al cliente.`
+  },
+  en: {
+    title: `${candidateData.fullName} | Cabin Crew · Flight Attendant`,
+    description: `Professional portfolio of ${candidateData.fullName}, a cabin crew candidate with customer service experience.`
+  },
+  fr: {
+    title: `${candidateData.fullName} | Personnel navigant commercial · Cabin Crew`,
+    description: `Portfolio professionnel de ${candidateData.fullName}, candidat au poste de personnel navigant commercial avec une expérience en service client.`
+  },
+  pt: {
+    title: `${candidateData.fullName} | Tripulante de Cabine · Cabin Crew`,
+    description: `Portefólio profissional de ${candidateData.fullName}, candidato a tripulante de cabine com experiência em atendimento ao cliente.`
+  }
+};
+
 let currentLanguage = "es";
 
 const getTranslation = (key) => translations[currentLanguage][key] || translations.es[key] || key;
@@ -506,20 +527,14 @@ function applyLanguage(language, savePreference = true) {
   const formLanguage = document.querySelector("#form-language");
   if (formLanguage) formLanguage.value = currentLanguage;
 
-  const isSpanish = currentLanguage === "es";
   const isSuccessPage = document.body.classList.contains("success-page");
+  const metadata = portfolioMetadata[currentLanguage] || portfolioMetadata.es;
   document.title = isSuccessPage
     ? `${getTranslation("success.kicker")} | ${candidateData.fullName}`
-    : isSpanish
-      ? `${candidateData.fullName} | Tripulante de Cabina · Cabin Crew`
-      : `${candidateData.fullName} | Cabin Crew · Flight Attendant`;
+    : metadata.title;
 
   const description = document.querySelector('meta[name="description"]');
-  if (description) {
-    description.content = isSpanish
-      ? `Portfolio profesional de ${candidateData.fullName}, candidato a Tripulante de Cabina con experiencia en atención al cliente.`
-      : `Professional portfolio of ${candidateData.fullName}, a cabin crew candidate with customer service experience.`;
-  }
+  if (description) description.content = metadata.description;
 
   if (savePreference) {
     try {

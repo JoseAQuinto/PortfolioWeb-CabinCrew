@@ -395,6 +395,7 @@ h3 {
   display: flex;
   align-items: center;
   margin-top: 1.5rem;
+  flex-wrap: wrap;
   gap: 1rem;
 }
 
@@ -1754,6 +1755,7 @@ h3 {
 
   .nav-actions {
     margin: 0 0 0 1.2rem;
+    flex-wrap: nowrap;
   }
 
   .hero-grid {

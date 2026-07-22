@@ -1,6 +1,6 @@
-﻿# Portfolio Cabin Crew · [NOMBRE COMPLETO]
+# Portfolio Cabin Crew · [NOMBRE COMPLETO]
 
-Portfolio profesional bilingüe (español e inglés) para un candidato que busca su primera oportunidad como Tripulante de Cabina de Pasajeros, Cabin Crew o Flight Attendant.
+Portfolio profesional multilingüe (español, inglés, francés y portugués) para un candidato que busca su primera oportunidad como Tripulante de Cabina de Pasajeros, Cabin Crew o Flight Attendant.
 
 ## Concepto creativo
 
@@ -12,7 +12,7 @@ La web no intenta ocultar la falta de experiencia a bordo. Presenta la experienc
 
 ## Mapa de secciones
 
-1. Navegación y selector ES / EN.
+1. Navegación y selector ES / EN / FR / PT.
 2. Hero con propuesta profesional y fotografía pendiente.
 3. Sobre mí.
 4. Por qué cabin crew.
@@ -23,7 +23,7 @@ La web no intenta ocultar la falta de experiencia a bordo. Presenta la experienc
 9. Formación y preparación.
 10. Valores profesionales.
 11. Contacto y formulario Netlify Forms.
-12. Página bilingüe de confirmación.
+12. Página multilingüe de confirmación.
 
 ## Sistema visual
 
@@ -48,6 +48,8 @@ El proyecto utiliza una pila tipográfica local para no depender de fuentes exte
 │   ├── styles.css
 │   └── success.css
 ├── js/
+│   ├── translations-fr.js
+│   ├── translations-pt.js
 │   └── script.js
 ├── assets/
 │   ├── documents/
@@ -68,7 +70,7 @@ El proyecto utiliza una pila tipográfica local para no depender de fuentes exte
 3. Busca `[` en todo el proyecto para localizar el resto de marcadores pendientes.
 4. Completa los dos bloques de experiencia solo con información real.
 5. Confirma el estado del certificado TCP, el pasaporte, primeros auxilios, formación en seguridad, bases internacionales, disponibilidad horaria y entrevistas.
-6. Revisa las traducciones en los objetos `translations.es` y `translations.en`.
+6. Revisa las traducciones en `script.js`, `translations-fr.js` y `translations-pt.js`.
 
 Los datos importantes para SEO también aparecen directamente en `index.html`. Actualiza el título, la descripción, el JSON-LD, las etiquetas Open Graph y las Twitter Cards cuando completes el nombre y las URL definitivas.
 
@@ -95,7 +97,7 @@ La proporción recomendada es 4:5. Conserva el contenedor `.portrait-frame` para
 
 1. Guarda el CV definitivo como `assets/documents/cv.pdf`.
 2. Cambia `candidateData.cvPath` en `js/script.js` a `assets/documents/cv.pdf`.
-3. Comprueba los tres botones de descarga en español y en inglés.
+3. Comprueba los botones de descarga en español, inglés, francés y portugués.
 4. Elimina `cv-placeholder.html` cuando ya no sea necesario.
 
 ## Añadir la imagen social
@@ -116,7 +118,7 @@ Después abre `http://localhost:8000`.
 
 Comprueba:
 
-- Cambio ES / EN sin recargar y persistencia tras actualizar.
+- Cambio ES / EN / FR / PT sin recargar y persistencia tras actualizar.
 - Navegación por anclas.
 - Menú móvil con teclado y tecla Escape.
 - Enlaces de correo, teléfono, LinkedIn y CV.
@@ -130,7 +132,7 @@ El envío real de Netlify Forms solo se procesa una vez desplegado en Netlify.
 ```bash
 git init -b master
 git add .
-git commit -m "feat: create bilingual cabin crew portfolio"
+git commit -m "feat: create multilingual cabin crew portfolio"
 git remote add origin https://github.com/JoseAQuinto/PortfolioWeb-CabinCrew.git
 git push -u origin master
 ```

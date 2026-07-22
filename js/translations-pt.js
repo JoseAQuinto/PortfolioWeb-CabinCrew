@@ -50,7 +50,6 @@ window.portfolioTranslations.pt = {
   "motivation.kicker": "Motivação",
   "motivation.title": "Porquê trabalhar como tripulante de cabine",
   "motivation.visualLabel": "serviço · segurança · pessoas",
-  "motivation.routeLabel": "rota europeia · 7 capitais",
   "motivation.body1": "Interesso-me por uma profissão em que cuidar das pessoas significa combinar proximidade com responsabilidade. Quero contribuir para que cada passageiro se sinta acompanhado, informado e seguro, sobretudo quando necessita de ajuda ou surge uma situação inesperada.",
   "motivation.body2": "O ambiente internacional, a coordenação de equipas multiculturais e a necessidade de adaptação a cada dia de trabalho correspondem à minha forma de trabalhar. O meu objetivo não é apenas viajar: quero desenvolver uma carreira de longo prazo na aviação, aprender os procedimentos com rigor e crescer numa equipa que partilha elevados padrões de serviço e segurança.",
   "experience.kicker": "Percurso",

@@ -73,7 +73,6 @@ const translations = {
     "motivation.kicker": "Motivación",
     "motivation.title": "Por qué cabin crew",
     "motivation.visualLabel": "servicio · seguridad · personas",
-    "motivation.routeLabel": "ruta europea · 7 capitales",
     "motivation.body1": "Me atrae una profesión en la que cuidar de las personas significa combinar cercanía con responsabilidad. Quiero contribuir a que cada pasajero se sienta atendido, informado y seguro, especialmente cuando necesita ayuda o surge una situación inesperada.",
     "motivation.body2": "El entorno internacional, la coordinación de equipos multiculturales y la necesidad de adaptarse a cada jornada encajan con mi forma de trabajar. Mi objetivo no es solo volar: es desarrollar una carrera a largo plazo en aviación, aprender procedimientos con rigor y crecer dentro de un equipo que comparte estándares altos de servicio y seguridad.",
 
@@ -291,7 +290,6 @@ const translations = {
     "motivation.kicker": "Motivation",
     "motivation.title": "Why cabin crew",
     "motivation.visualLabel": "service · safety · people",
-    "motivation.routeLabel": "European route · 7 capitals",
     "motivation.body1": "I am interested in a profession where caring for people means combining a warm approach with responsibility. I want to help every passenger feel supported, informed and safe, especially when they need assistance or an unexpected situation occurs.",
     "motivation.body2": "The international environment, the coordination of multicultural teams and the need to adapt to each working day suit the way I work. My goal is not simply to fly. I want to build a long-term career in aviation, learn procedures carefully and grow in a team that shares high standards of service and safety.",
 
@@ -946,30 +944,18 @@ function setupFlightAnimation() {
   const flightDuration = 15000;
   const pauseDuration = 2400;
   const cities = [
-    { id: "lisbon", lon: -9.14, lat: 38.72, labelOffset: [-7, 14] },
-    { id: "madrid", lon: -3.7, lat: 40.42, labelOffset: [7, 15] },
-    { id: "paris", lon: 2.35, lat: 48.86, labelOffset: [7, -8] },
-    { id: "london", lon: -0.13, lat: 51.51, labelOffset: [-7, -9] },
-    { id: "amsterdam", lon: 4.9, lat: 52.37, labelOffset: [8, 14] },
-    { id: "berlin", lon: 13.41, lat: 52.52, labelOffset: [8, -8] },
-    { id: "rome", lon: 12.5, lat: 41.9, labelOffset: [8, 14] }
+    { id: "madrid", lon: -3.7, lat: 40.42, labelOffset: [-7, 15] },
+    { id: "paris", lon: 2.35, lat: 48.86, labelOffset: [7, -9] },
+    { id: "london", lon: -0.13, lat: 51.51, labelOffset: [-7, -10] },
+    { id: "berlin", lon: 13.41, lat: 52.52, labelOffset: [8, -9] },
+    { id: "rome", lon: 12.5, lat: 41.9, labelOffset: [8, 15] }
   ];
   const cityNames = {
-    es: { lisbon: "Lisboa", madrid: "Madrid", paris: "París", london: "Londres", amsterdam: "Ámsterdam", berlin: "Berlín", rome: "Roma" },
-    en: { lisbon: "Lisbon", madrid: "Madrid", paris: "Paris", london: "London", amsterdam: "Amsterdam", berlin: "Berlin", rome: "Rome" },
-    fr: { lisbon: "Lisbonne", madrid: "Madrid", paris: "Paris", london: "Londres", amsterdam: "Amsterdam", berlin: "Berlin", rome: "Rome" },
-    pt: { lisbon: "Lisboa", madrid: "Madrid", paris: "Paris", london: "Londres", amsterdam: "Amesterdão", berlin: "Berlim", rome: "Roma" }
+    es: { madrid: "Madrid", paris: "París", london: "Londres", berlin: "Berlín", rome: "Roma" },
+    en: { madrid: "Madrid", paris: "Paris", london: "London", berlin: "Berlin", rome: "Rome" },
+    fr: { madrid: "Madrid", paris: "Paris", london: "Londres", berlin: "Berlin", rome: "Rome" },
+    pt: { madrid: "Madrid", paris: "Paris", london: "Londres", berlin: "Berlim", rome: "Roma" }
   };
-  const landShapes = [
-    [[-9.5, 43.8], [-9.3, 36.9], [-5.5, 36], [-1.8, 37.2], [0.8, 39.5], [3.2, 42.4], [0.7, 43.7], [-1.6, 43.4], [-5.5, 43.8]],
-    [[-5, 48.7], [-4.6, 47.7], [-1.8, 43.4], [3.2, 42.5], [7.4, 43.7], [8.4, 46.2], [12, 47], [15.3, 49], [22, 48.5], [28, 45], [30, 49], [27, 54], [23, 57], [17, 55], [13, 54.5], [10, 54.8], [8, 53], [4, 51.5], [1.8, 50.8], [-1.8, 49.8]],
-    [[5.2, 58], [7.8, 54.8], [12, 55], [15, 58], [19, 61.8], [27, 61.5], [24, 57.5], [18, 55], [12, 56.5], [9, 60.5]],
-    [[-6.2, 50], [-5.3, 53.2], [-4.4, 58], [-2.2, 59], [0.1, 56], [1.5, 52], [0.2, 50.5]],
-    [[-10.4, 51.4], [-10, 54.5], [-7.3, 55.4], [-5.8, 53], [-7, 51.4]],
-    [[7.4, 44.7], [10, 44.9], [12.5, 43], [12.5, 41], [15.4, 39], [17, 39.2], [16, 41.2], [14, 42.7], [13.5, 45.5]],
-    [[13, 46], [18, 46.5], [23, 44], [27, 41], [25, 38], [21, 40], [19, 43], [16, 42], [14, 44]],
-    [[20, 39.8], [22, 37], [24.5, 35.5], [26, 36.7], [24, 39.2]]
-  ];
   let width = 0;
   let height = 0;
   let pixelRatio = 1;
@@ -980,7 +966,7 @@ function setupFlightAnimation() {
   const project = (lon, lat) => {
     const horizontalPadding = Math.max(22, width * 0.075);
     const topPadding = Math.max(20, height * 0.07);
-    const bottomPadding = Math.max(42, height * 0.12);
+    const bottomPadding = Math.max(20, height * 0.07);
     return {
       x: horizontalPadding + ((lon + 12) / 43) * (width - horizontalPadding * 2),
       y: topPadding + ((62 - lat) / 28) * (height - topPadding - bottomPadding)
@@ -1034,45 +1020,6 @@ function setupFlightAnimation() {
         context.lineTo(point.x, point.y);
       }
     });
-  };
-
-  const drawMap = () => {
-    context.save();
-    context.lineWidth = 0.7;
-    context.strokeStyle = "rgba(169, 217, 233, 0.07)";
-    [-10, 0, 10, 20, 30].forEach((lon) => {
-      const top = project(lon, 62);
-      const bottom = project(lon, 35);
-      context.beginPath();
-      context.moveTo(top.x, top.y);
-      context.lineTo(bottom.x, bottom.y);
-      context.stroke();
-    });
-    [40, 45, 50, 55, 60].forEach((lat) => {
-      const left = project(-12, lat);
-      const right = project(31, lat);
-      context.beginPath();
-      context.moveTo(left.x, left.y);
-      context.lineTo(right.x, right.y);
-      context.stroke();
-    });
-
-    context.fillStyle = "rgba(169, 217, 233, 0.075)";
-    context.strokeStyle = "rgba(169, 217, 233, 0.2)";
-    context.lineWidth = 1;
-    context.lineJoin = "round";
-    landShapes.forEach((shape) => {
-      context.beginPath();
-      shape.forEach(([lon, lat], index) => {
-        const point = project(lon, lat);
-        if (index === 0) context.moveTo(point.x, point.y);
-        else context.lineTo(point.x, point.y);
-      });
-      context.closePath();
-      context.fill();
-      context.stroke();
-    });
-    context.restore();
   };
 
   const drawAircraft = (point, angle) => {
@@ -1130,7 +1077,6 @@ function setupFlightAnimation() {
 
   const draw = (time, staticFrame = false) => {
     context.clearRect(0, 0, width, height);
-    drawMap();
     const points = cities.map((city) => project(city.lon, city.lat));
     const segments = getRouteSegments(points);
     const progress = staticFrame ? 0.58 : Math.min(((time - cycleStart) % (flightDuration + pauseDuration)) / flightDuration, 1);

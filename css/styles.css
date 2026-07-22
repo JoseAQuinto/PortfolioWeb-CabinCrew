@@ -342,13 +342,22 @@ h3 {
 }
 
 .primary-navigation {
-  position: fixed;
-  inset: var(--header-height) 0 0;
+  position: absolute;
+  z-index: 99;
+  top: 100%;
+  right: 0;
+  left: 0;
   display: flex;
   visibility: hidden;
+  height: calc(100vh - var(--header-height));
+  height: calc(100dvh - var(--header-height));
   padding: 2rem 1.5rem 3rem;
   flex-direction: column;
-  background: var(--white);
+  overflow-y: auto;
+  color: var(--ink);
+  background-color: var(--white);
+  box-shadow: 0 24px 45px rgba(7, 26, 47, 0.16);
+  isolation: isolate;
   opacity: 0;
   transform: translateY(-1rem);
   transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
@@ -1728,10 +1737,14 @@ h3 {
     position: static;
     display: flex;
     visibility: visible;
+    height: auto;
     padding: 0;
     align-items: center;
     flex-direction: row;
+    overflow: visible;
     background: transparent;
+    box-shadow: none;
+    isolation: auto;
     opacity: 1;
     transform: none;
   }

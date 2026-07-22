@@ -73,6 +73,7 @@ const translations = {
     "motivation.kicker": "Motivación",
     "motivation.title": "Por qué cabin crew",
     "motivation.visualLabel": "servicio · seguridad · personas",
+    "motivation.routeLabel": "ruta europea · 7 capitales",
     "motivation.body1": "Me atrae una profesión en la que cuidar de las personas significa combinar cercanía con responsabilidad. Quiero contribuir a que cada pasajero se sienta atendido, informado y seguro, especialmente cuando necesita ayuda o surge una situación inesperada.",
     "motivation.body2": "El entorno internacional, la coordinación de equipos multiculturales y la necesidad de adaptarse a cada jornada encajan con mi forma de trabajar. Mi objetivo no es solo volar: es desarrollar una carrera a largo plazo en aviación, aprender procedimientos con rigor y crecer dentro de un equipo que comparte estándares altos de servicio y seguridad.",
 
@@ -290,6 +291,7 @@ const translations = {
     "motivation.kicker": "Motivation",
     "motivation.title": "Why cabin crew",
     "motivation.visualLabel": "service · safety · people",
+    "motivation.routeLabel": "European route · 7 capitals",
     "motivation.body1": "I am interested in a profession where caring for people means combining a warm approach with responsibility. I want to help every passenger feel supported, informed and safe, especially when they need assistance or an unexpected situation occurs.",
     "motivation.body2": "The international environment, the coordination of multicultural teams and the need to adapt to each working day suit the way I work. My goal is not simply to fly. I want to build a long-term career in aviation, learn procedures carefully and grow in a team that shares high standards of service and safety.",
 
@@ -936,37 +938,269 @@ function setupHeroRouteCanvas() {
 }
 function setupFlightAnimation() {
   const route = document.querySelector(".motivation-visual");
-  const plane = route?.querySelector(".flight-plane");
-  if (!route || !plane) return;
+  const canvas = route?.querySelector(".europe-route-canvas");
+  const context = canvas?.getContext("2d");
+  if (!route || !canvas || !context) return;
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const flightDuration = 7600;
-  const pauseDuration = 2800;
-  let width = route.clientWidth;
-  let height = route.clientHeight;
+  const flightDuration = 15000;
+  const pauseDuration = 2400;
+  const cities = [
+    { id: "lisbon", lon: -9.14, lat: 38.72, labelOffset: [-7, 14] },
+    { id: "madrid", lon: -3.7, lat: 40.42, labelOffset: [7, 15] },
+    { id: "paris", lon: 2.35, lat: 48.86, labelOffset: [7, -8] },
+    { id: "london", lon: -0.13, lat: 51.51, labelOffset: [-7, -9] },
+    { id: "amsterdam", lon: 4.9, lat: 52.37, labelOffset: [8, 14] },
+    { id: "berlin", lon: 13.41, lat: 52.52, labelOffset: [8, -8] },
+    { id: "rome", lon: 12.5, lat: 41.9, labelOffset: [8, 14] }
+  ];
+  const cityNames = {
+    es: { lisbon: "Lisboa", madrid: "Madrid", paris: "París", london: "Londres", amsterdam: "Ámsterdam", berlin: "Berlín", rome: "Roma" },
+    en: { lisbon: "Lisbon", madrid: "Madrid", paris: "Paris", london: "London", amsterdam: "Amsterdam", berlin: "Berlin", rome: "Rome" },
+    fr: { lisbon: "Lisbonne", madrid: "Madrid", paris: "Paris", london: "Londres", amsterdam: "Amsterdam", berlin: "Berlin", rome: "Rome" },
+    pt: { lisbon: "Lisboa", madrid: "Madrid", paris: "Paris", london: "Londres", amsterdam: "Amesterdão", berlin: "Berlim", rome: "Roma" }
+  };
+  const landShapes = [
+    [[-9.5, 43.8], [-9.3, 36.9], [-5.5, 36], [-1.8, 37.2], [0.8, 39.5], [3.2, 42.4], [0.7, 43.7], [-1.6, 43.4], [-5.5, 43.8]],
+    [[-5, 48.7], [-4.6, 47.7], [-1.8, 43.4], [3.2, 42.5], [7.4, 43.7], [8.4, 46.2], [12, 47], [15.3, 49], [22, 48.5], [28, 45], [30, 49], [27, 54], [23, 57], [17, 55], [13, 54.5], [10, 54.8], [8, 53], [4, 51.5], [1.8, 50.8], [-1.8, 49.8]],
+    [[5.2, 58], [7.8, 54.8], [12, 55], [15, 58], [19, 61.8], [27, 61.5], [24, 57.5], [18, 55], [12, 56.5], [9, 60.5]],
+    [[-6.2, 50], [-5.3, 53.2], [-4.4, 58], [-2.2, 59], [0.1, 56], [1.5, 52], [0.2, 50.5]],
+    [[-10.4, 51.4], [-10, 54.5], [-7.3, 55.4], [-5.8, 53], [-7, 51.4]],
+    [[7.4, 44.7], [10, 44.9], [12.5, 43], [12.5, 41], [15.4, 39], [17, 39.2], [16, 41.2], [14, 42.7], [13.5, 45.5]],
+    [[13, 46], [18, 46.5], [23, 44], [27, 41], [25, 38], [21, 40], [19, 43], [16, 42], [14, 44]],
+    [[20, 39.8], [22, 37], [24.5, 35.5], [26, 36.7], [24, 39.2]]
+  ];
+  let width = 0;
+  let height = 0;
+  let pixelRatio = 1;
   let frameId = null;
-  let cycleStart = performance.now();
   let isVisible = false;
+  let cycleStart = performance.now();
 
-  const updateDimensions = () => {
-    width = route.clientWidth;
-    height = route.clientHeight;
+  const project = (lon, lat) => {
+    const horizontalPadding = Math.max(22, width * 0.075);
+    const topPadding = Math.max(20, height * 0.07);
+    const bottomPadding = Math.max(42, height * 0.12);
+    return {
+      x: horizontalPadding + ((lon + 12) / 43) * (width - horizontalPadding * 2),
+      y: topPadding + ((62 - lat) / 28) * (height - topPadding - bottomPadding)
+    };
   };
 
-  const positionPlane = (progress, forceVisible = false) => {
-    const start = { x: width * 0.18, y: height * 0.62 };
-    const control = { x: width * 0.5, y: height * 0.32 };
-    const end = { x: width * 0.83, y: height * 0.27 };
-    const inverse = 1 - progress;
-    const x = inverse * inverse * start.x + 2 * inverse * progress * control.x + progress * progress * end.x;
-    const y = inverse * inverse * start.y + 2 * inverse * progress * control.y + progress * progress * end.y;
-    const tangentX = 2 * inverse * (control.x - start.x) + 2 * progress * (end.x - control.x);
-    const tangentY = 2 * inverse * (control.y - start.y) + 2 * progress * (end.y - control.y);
-    const angle = Math.atan2(tangentY, tangentX) * (180 / Math.PI) - 45;
-    const fade = forceVisible ? 0.78 : Math.min(1, progress * 8, (1 - progress) * 8);
+  const getRouteSegments = (points) => points.slice(0, -1).map((point, index) => {
+    const previous = points[Math.max(0, index - 1)];
+    const next = points[index + 1];
+    const following = points[Math.min(points.length - 1, index + 2)];
+    return {
+      start: point,
+      controlOne: {
+        x: point.x + (next.x - previous.x) / 6,
+        y: point.y + (next.y - previous.y) / 6
+      },
+      controlTwo: {
+        x: next.x - (following.x - point.x) / 6,
+        y: next.y - (following.y - point.y) / 6
+      },
+      end: next
+    };
+  });
 
-    plane.style.transform = `translate3d(${x - 17}px, ${y - 17}px, 0) rotate(${angle}deg)`;
-    plane.style.opacity = String(Math.max(0, fade));
+  const getBezierPoint = (segment, progress) => {
+    const inverse = 1 - progress;
+    return {
+      x: inverse ** 3 * segment.start.x + 3 * inverse ** 2 * progress * segment.controlOne.x + 3 * inverse * progress ** 2 * segment.controlTwo.x + progress ** 3 * segment.end.x,
+      y: inverse ** 3 * segment.start.y + 3 * inverse ** 2 * progress * segment.controlOne.y + 3 * inverse * progress ** 2 * segment.controlTwo.y + progress ** 3 * segment.end.y
+    };
+  };
+
+  const getBezierTangent = (segment, progress) => {
+    const inverse = 1 - progress;
+    return {
+      x: 3 * inverse ** 2 * (segment.controlOne.x - segment.start.x) + 6 * inverse * progress * (segment.controlTwo.x - segment.controlOne.x) + 3 * progress ** 2 * (segment.end.x - segment.controlTwo.x),
+      y: 3 * inverse ** 2 * (segment.controlOne.y - segment.start.y) + 6 * inverse * progress * (segment.controlTwo.y - segment.controlOne.y) + 3 * progress ** 2 * (segment.end.y - segment.controlTwo.y)
+    };
+  };
+
+  const traceRoute = (segments, endSegment = segments.length - 1, endProgress = 1) => {
+    if (!segments.length) return;
+    context.beginPath();
+    context.moveTo(segments[0].start.x, segments[0].start.y);
+    segments.forEach((segment, segmentIndex) => {
+      if (segmentIndex > endSegment) return;
+      const limit = segmentIndex === endSegment ? endProgress : 1;
+      const steps = Math.max(2, Math.ceil(24 * limit));
+      for (let step = 1; step <= steps; step += 1) {
+        const point = getBezierPoint(segment, (step / steps) * limit);
+        context.lineTo(point.x, point.y);
+      }
+    });
+  };
+
+  const drawMap = () => {
+    context.save();
+    context.lineWidth = 0.7;
+    context.strokeStyle = "rgba(169, 217, 233, 0.07)";
+    [-10, 0, 10, 20, 30].forEach((lon) => {
+      const top = project(lon, 62);
+      const bottom = project(lon, 35);
+      context.beginPath();
+      context.moveTo(top.x, top.y);
+      context.lineTo(bottom.x, bottom.y);
+      context.stroke();
+    });
+    [40, 45, 50, 55, 60].forEach((lat) => {
+      const left = project(-12, lat);
+      const right = project(31, lat);
+      context.beginPath();
+      context.moveTo(left.x, left.y);
+      context.lineTo(right.x, right.y);
+      context.stroke();
+    });
+
+    context.fillStyle = "rgba(169, 217, 233, 0.075)";
+    context.strokeStyle = "rgba(169, 217, 233, 0.2)";
+    context.lineWidth = 1;
+    context.lineJoin = "round";
+    landShapes.forEach((shape) => {
+      context.beginPath();
+      shape.forEach(([lon, lat], index) => {
+        const point = project(lon, lat);
+        if (index === 0) context.moveTo(point.x, point.y);
+        else context.lineTo(point.x, point.y);
+      });
+      context.closePath();
+      context.fill();
+      context.stroke();
+    });
+    context.restore();
+  };
+
+  const drawAircraft = (point, angle) => {
+    const scale = width < 380 ? 0.82 : 0.94;
+    context.save();
+    context.translate(point.x, point.y);
+    context.rotate(angle);
+    context.scale(scale, scale);
+    context.shadowColor = "rgba(0, 0, 0, 0.42)";
+    context.shadowBlur = 8;
+    context.shadowOffsetY = 3;
+    context.beginPath();
+    context.moveTo(15, 0);
+    context.bezierCurveTo(12, -2, 8, -2.6, 4, -3);
+    context.lineTo(0, -11);
+    context.lineTo(-3.2, -11);
+    context.lineTo(-1.8, -2.5);
+    context.lineTo(-9, -1.5);
+    context.lineTo(-11.5, -4.5);
+    context.lineTo(-13.5, -4.5);
+    context.lineTo(-12.2, 0);
+    context.lineTo(-13.5, 4.5);
+    context.lineTo(-11.5, 4.5);
+    context.lineTo(-9, 1.5);
+    context.lineTo(-1.8, 2.5);
+    context.lineTo(-3.2, 11);
+    context.lineTo(0, 11);
+    context.lineTo(4, 3);
+    context.bezierCurveTo(8, 2.6, 12, 2, 15, 0);
+    context.closePath();
+    const body = context.createLinearGradient(-12, -8, 14, 7);
+    body.addColorStop(0, "#24465f");
+    body.addColorStop(0.36, "#d5e0e7");
+    body.addColorStop(0.62, "#f4f7f8");
+    body.addColorStop(1, "#58788e");
+    context.fillStyle = body;
+    context.fill();
+    context.shadowBlur = 0;
+    context.shadowOffsetY = 0;
+    context.strokeStyle = "rgba(7, 26, 47, 0.9)";
+    context.lineWidth = 0.9;
+    context.stroke();
+    context.beginPath();
+    context.moveTo(-8, 0);
+    context.lineTo(10, 0);
+    context.strokeStyle = "rgba(255, 255, 255, 0.58)";
+    context.lineWidth = 0.7;
+    context.stroke();
+    context.beginPath();
+    context.ellipse(9, 0, 2.4, 1.25, 0, 0, Math.PI * 2);
+    context.fillStyle = "#17344a";
+    context.fill();
+    context.restore();
+  };
+
+  const draw = (time, staticFrame = false) => {
+    context.clearRect(0, 0, width, height);
+    drawMap();
+    const points = cities.map((city) => project(city.lon, city.lat));
+    const segments = getRouteSegments(points);
+    const progress = staticFrame ? 0.58 : Math.min(((time - cycleStart) % (flightDuration + pauseDuration)) / flightDuration, 1);
+    const routePosition = Math.min(progress * segments.length, segments.length - 0.0001);
+    const segmentIndex = Math.floor(routePosition);
+    const localProgress = routePosition - segmentIndex;
+
+    context.save();
+    traceRoute(segments);
+    context.setLineDash([3, 7]);
+    context.lineDashOffset = staticFrame ? 0 : -time * 0.012;
+    context.strokeStyle = "rgba(169, 217, 233, 0.45)";
+    context.lineWidth = 1.2;
+    context.stroke();
+    context.setLineDash([]);
+    traceRoute(segments, segmentIndex, localProgress);
+    context.strokeStyle = "rgba(211, 164, 74, 0.82)";
+    context.lineWidth = 1.7;
+    context.stroke();
+    context.restore();
+
+    const language = document.documentElement.lang?.slice(0, 2) || "es";
+    const labels = cityNames[language] || cityNames.es;
+    cities.forEach((city, index) => {
+      const point = points[index];
+      const reached = index <= segmentIndex || (index === segments.length && progress >= 0.999);
+      const pulse = reached && !staticFrame ? (Math.sin(time * 0.004 - index) + 1) / 2 : 0;
+      if (pulse > 0) {
+        context.beginPath();
+        context.arc(point.x, point.y, 5 + pulse * 4, 0, Math.PI * 2);
+        context.strokeStyle = `rgba(211, 164, 74, ${0.2 * (1 - pulse)})`;
+        context.lineWidth = 1;
+        context.stroke();
+      }
+      context.beginPath();
+      context.arc(point.x, point.y, reached ? 3.2 : 2.5, 0, Math.PI * 2);
+      context.fillStyle = reached ? "#d3a44a" : "rgba(169, 217, 233, 0.72)";
+      context.fill();
+      context.font = `${width < 380 ? 8.5 : 9.5}px Inter, Arial, sans-serif`;
+      context.textAlign = city.labelOffset[0] < 0 ? "right" : "left";
+      context.textBaseline = "middle";
+      context.fillStyle = reached ? "rgba(255, 255, 255, 0.88)" : "rgba(214, 228, 236, 0.66)";
+      context.fillText(labels[city.id], point.x + city.labelOffset[0], point.y + city.labelOffset[1]);
+    });
+
+    const activeSegment = segments[segmentIndex];
+    const aircraftPoint = getBezierPoint(activeSegment, localProgress);
+    const tangent = getBezierTangent(activeSegment, localProgress);
+    const angle = Math.atan2(tangent.y, tangent.x);
+    const glow = context.createRadialGradient(aircraftPoint.x, aircraftPoint.y, 0, aircraftPoint.x, aircraftPoint.y, 18);
+    glow.addColorStop(0, "rgba(169, 217, 233, 0.18)");
+    glow.addColorStop(1, "rgba(169, 217, 233, 0)");
+    context.beginPath();
+    context.arc(aircraftPoint.x, aircraftPoint.y, 18, 0, Math.PI * 2);
+    context.fillStyle = glow;
+    context.fill();
+    drawAircraft(aircraftPoint, angle);
+  };
+
+  const resizeCanvas = () => {
+    const bounds = route.getBoundingClientRect();
+    width = Math.max(1, bounds.width);
+    height = Math.max(1, bounds.height);
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    canvas.width = Math.round(width * pixelRatio);
+    canvas.height = Math.round(height * pixelRatio);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    draw(performance.now(), reducedMotion.matches);
   };
 
   const stopAnimation = () => {
@@ -979,23 +1213,16 @@ function setupFlightAnimation() {
       stopAnimation();
       return;
     }
-
-    const cycleLength = flightDuration + pauseDuration;
-    const elapsed = (time - cycleStart) % cycleLength;
-    const progress = Math.min(elapsed / flightDuration, 1);
-    positionPlane(progress);
+    draw(time);
     frameId = requestAnimationFrame(animate);
   };
 
   const startAnimation = () => {
     stopAnimation();
-    updateDimensions();
     if (reducedMotion.matches) {
-      plane.classList.add("is-static");
-      positionPlane(0.58, true);
+      draw(performance.now(), true);
       return;
     }
-    plane.classList.remove("is-static");
     cycleStart = performance.now();
     frameId = requestAnimationFrame(animate);
   };
@@ -1011,12 +1238,14 @@ function setupFlightAnimation() {
     isVisible = true;
     startAnimation();
   }
-  window.addEventListener("resize", updateDimensions);
+  if ("ResizeObserver" in window) new ResizeObserver(resizeCanvas).observe(route);
+  else window.addEventListener("resize", resizeCanvas);
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && isVisible) startAnimation();
     else stopAnimation();
   });
   reducedMotion.addEventListener?.("change", startAnimation);
+  resizeCanvas();
 }
 function initialisePortfolio() {
   const yearElement = document.querySelector("#current-year");

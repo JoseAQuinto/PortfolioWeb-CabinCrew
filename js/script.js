@@ -765,6 +765,58 @@ function setupHeroRouteCanvas() {
     context.globalAlpha = 1;
   };
 
+  const drawAircraft = (point, angle) => {
+    context.save();
+    context.translate(point.x, point.y);
+    context.rotate(angle);
+    context.shadowColor = "rgba(7, 26, 47, 0.28)";
+    context.shadowBlur = 8;
+    context.shadowOffsetY = 2;
+
+    context.beginPath();
+    context.moveTo(13, 0);
+    context.bezierCurveTo(10, -2, 7, -2.5, 4, -2.8);
+    context.lineTo(0, -10);
+    context.lineTo(-3, -10);
+    context.lineTo(-1.5, -2.4);
+    context.lineTo(-8, -1.4);
+    context.lineTo(-10, -4.4);
+    context.lineTo(-12, -4.4);
+    context.lineTo(-11.2, 0);
+    context.lineTo(-12, 4.4);
+    context.lineTo(-10, 4.4);
+    context.lineTo(-8, 1.4);
+    context.lineTo(-1.5, 2.4);
+    context.lineTo(-3, 10);
+    context.lineTo(0, 10);
+    context.lineTo(4, 2.8);
+    context.bezierCurveTo(7, 2.5, 10, 2, 13, 0);
+    context.closePath();
+
+    const bodyGradient = context.createLinearGradient(-12, -8, 13, 6);
+    bodyGradient.addColorStop(0, "#17344a");
+    bodyGradient.addColorStop(0.48, "#8197a8");
+    bodyGradient.addColorStop(1, "#244f6b");
+    context.fillStyle = bodyGradient;
+    context.fill();
+    context.shadowBlur = 0;
+    context.shadowOffsetY = 0;
+    context.strokeStyle = "rgba(7, 26, 47, 0.78)";
+    context.lineWidth = 0.8;
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(-7, 0);
+    context.lineTo(9, 0);
+    context.strokeStyle = "rgba(255, 255, 255, 0.46)";
+    context.lineWidth = 0.7;
+    context.stroke();
+    context.beginPath();
+    context.ellipse(7.2, 0, 2.1, 1.15, 0, 0, Math.PI * 2);
+    context.fillStyle = "rgba(169, 217, 233, 0.92)";
+    context.fill();
+    context.restore();
+  };
   const draw = (time, staticFrame = false) => {
     context.clearRect(0, 0, width, height);
     context.save();
@@ -795,26 +847,15 @@ function setupHeroRouteCanvas() {
     const markerInverse = 1 - markerProgress;
     const tangentX = (2 * markerInverse * (activeRoute.control[0] - activeRoute.start[0]) + 2 * markerProgress * (activeRoute.end[0] - activeRoute.control[0])) * width;
     const tangentY = (2 * markerInverse * (activeRoute.control[1] - activeRoute.start[1]) + 2 * markerProgress * (activeRoute.end[1] - activeRoute.control[1])) * height;
-    const markerAngle = Math.atan2(tangentY, tangentX) - Math.PI / 4;
-    const glow = context.createRadialGradient(marker.x, marker.y, 0, marker.x, marker.y, 17);
-    glow.addColorStop(0, "rgba(211, 164, 74, 0.7)");
-    glow.addColorStop(1, "rgba(211, 164, 74, 0)");
+    const markerAngle = Math.atan2(tangentY, tangentX);
+    const glow = context.createRadialGradient(marker.x, marker.y, 0, marker.x, marker.y, 16);
+    glow.addColorStop(0, "rgba(47, 111, 159, 0.2)");
+    glow.addColorStop(1, "rgba(47, 111, 159, 0)");
     context.beginPath();
-    context.arc(marker.x, marker.y, 17, 0, Math.PI * 2);
+    context.arc(marker.x, marker.y, 16, 0, Math.PI * 2);
     context.fillStyle = glow;
     context.fill();
-
-    context.save();
-    context.translate(marker.x, marker.y);
-    context.rotate(markerAngle);
-    context.font = '18px "Segoe UI Symbol", Arial, sans-serif';
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillStyle = "rgba(211, 164, 74, 0.98)";
-    context.shadowColor = "rgba(211, 164, 74, 0.5)";
-    context.shadowBlur = 7;
-    context.fillText("✈︎", 0, 0);
-    context.restore();
+    drawAircraft(marker, markerAngle);
     context.restore();
   };
 
